@@ -3,3 +3,4 @@ data.json
 data_valid.json
 node_modules
 *.db
+*.db-journal

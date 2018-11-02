@@ -27,8 +27,8 @@ function _printEntry(entry) {
 module.exports = {
     // obj
     put: function (person) {
-        const objectFields = ['city', 'contacts', 'country',
-            'last_seen', 'military', 'occupation', 'personal'];
+        const objectFields = ['city', 'country', 'last_seen',
+            'military', 'occupation', 'personal', 'relation_partner'];
         const arrayFields = ['career', 'relatives', 'schools', 'universities'];
         const keys = [];
         const values = [];
@@ -58,14 +58,29 @@ module.exports = {
                 values.push(person[field]);
             }
         });
+        for (let i = 0; i < values.length; i++) {
+            if (typeof values[i] === 'string') {
+                // g is for replacing all quotes, sqlite needs another quote for escaping
+                // instead of backslash
+                values[i] = values[i].replace(/\'/g, '\'\'');
+                values[i] = values[i].replace(/"/g, '""');
+            }
+        };
 
         const keysStr = keys.join(', ');
-        // slice is for [ and ]
-        const valuesStr = JSON.stringify(values).slice(1, -1);
+        // slice is for [ and ] and replace removes escaping backslashes
+        let valuesStr = JSON.stringify(values).slice(1, -1).replace(/\\"/g, '"').replace(/\\'/g, '\'');
         return new Promise((res, rej) => {
-            db.run(`INSERT INTO users(${keysStr}) VALUES(${valuesStr})`, [], err => {
-                err ? rej() : res();
-            })
+            // thats a bad solution to check if db contains id after everything else
+            // but im too lazy right now
+            db.serialize(() => {
+                if (module.exports.contains(person.id)) {
+                    res();
+                }
+                db.run(`INSERT INTO users(${keysStr}) VALUES(${valuesStr})`, [], err => {
+                    err ? rej(err) : res();
+                })
+            });
         });
     },
 
@@ -80,7 +95,7 @@ module.exports = {
     createTable: function (tableName = 'users', schema = usersSchema) {
         return new Promise((res, rej) => {
             db.run(`CREATE TABLE IF NOT EXISTS ${tableName} (${schema})`, [], err => {
-                err ? rej() : res();
+                err ? rej(err) : res();
             })
         })
     },
