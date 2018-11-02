@@ -3,9 +3,12 @@ const got = require('got');
 const fs = require('fs');
 const vk = require('vk-call');
 
+const dbApi = require('./dbApi');
+dbApi.createTable();
+
 // accessToken is valid for 24 hours, after that we need
 // to get it again with clientId aka appId
-const keys = JSON.parse(fs.readFileSync('keys.json'));  
+const keys = JSON.parse(fs.readFileSync('./data/keys.json'));  
 const token = keys.accessToken;
 
 const api = new vk.VK({
@@ -21,17 +24,17 @@ const api = new vk.VK({
 // finding our region id. It is pretty slow, so I just
 // precomputed it
 // 1154131 - Свердловская область
-async function findRegionId(countryId, title) {
-	let ourRegion;
-	await api.call('database.getRegions', {country_id: countryId})
-		.then(res => res.items)
-		.then(regions => {
-			ourRegion = regions.find(region =>
-				region.title === title
-				);
-		});
-	return ourRegion.id;
-}
+// async function findRegionId(countryId, title) {
+// 	let ourRegion;
+// 	await api.call('database.getRegions', {country_id: countryId})
+// 		.then(res => res.items)
+// 		.then(regions => {
+// 			ourRegion = regions.find(region =>
+// 				region.title === title
+// 				);
+// 		});
+// 	return ourRegion.id;
+// }
 
 const russiaId = 1;
 /*
@@ -54,7 +57,7 @@ const regionId = 1154131;
 // 	count: 1000
 // })
 // 	.then(res => {
-// 		fs.writeFileSync('cities.json', JSON.stringify(res.items), 'utf8')
+// 		fs.writeFileSync('./data/cities.json', JSON.stringify(res.items), 'utf8')
 // });
 
 const fields = [
@@ -69,13 +72,13 @@ const fields = [
 	'counters', 'timezone', 'maiden_name', 'career', 'military'
 ];
 
-const cities = JSON.parse(fs.readFileSync('cities.json'));
+const cities = JSON.parse(fs.readFileSync('./data/cities.json'));
 let people = 0;
 
 async function fetchData(offset, cityIdx) {
 	console.info('fetching');
 	if (cityIdx == cities.length) {
-		fs.appendFile('data.json', ']');
+		fs.appendFile('./data/data.json', ']');
 		return;
 	}
 	try {
@@ -117,8 +120,8 @@ async function fetchData(offset, cityIdx) {
 		try {
 			for (let i = 0; i < res.items.length; i++) {
 				if (res.items[i]) {
-					await fs.appendFile('data.json', JSON.stringify(res.items[i]));
-					await fs.appendFile('data.json', ',\n');
+					await fs.appendFile('./data/data.json', JSON.stringify(res.items[i]));
+					await fs.appendFile('./data/data.json', ',\n');
 				}
 			}
 		} catch (e) {
@@ -140,5 +143,5 @@ async function fetchData(offset, cityIdx) {
 	}
 } 
 
-fs.writeFileSync('data.json', '[');
+fs.writeFileSync('./data/data.json', '[');
 fetchData(0, 0);
