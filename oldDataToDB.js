@@ -2,7 +2,7 @@
 const fs = require('fs');
 
 const dbApi = require('./dbApi');
-// dbApi.dropTable();
+dbApi.dropTable();
 dbApi.createTable();
 const oldData = JSON.parse(fs.readFileSync('./data/data_valid.json'));
 async function saveData(arr) {

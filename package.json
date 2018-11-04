@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "fs": "0.0.1-security",
-    "got": "^9.3.0",
     "sqlite3": "^4.0.3",
     "vk-call": "^2.1.0"
   }

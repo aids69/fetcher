@@ -116,12 +116,28 @@ module.exports = {
         });
     },
 
+    getAllIds: function (tableName = 'users') {
+        return new Promise((res, rej) => {
+            db.all(`SELECT id FROM ${tableName}`, (err, rows) => {
+                err ? res([]) : res(rows.map(el => el.id));
+            });
+        });
+    },
+
     contains: function (id, tableName = 'users') {
         return module.exports.getById(id).then(entry => !!Object.keys(entry).length);
     },
 
+    addFriends: function (id, friends, tableName = 'users') {
+        return new Promise((res, rej) => {
+            db.run(`UPDATE ${tableName} SET friends = ${friends} WHERE id = ${id}`, [], err => {
+                err ? rej(err) : res();
+            })
+        });
+    },
+
     prettyPrintById: function (id, tableName = 'users') {
-        getById(id).then(res => {
+        module.exports.getById(id).then(res => {
             _printEntry(res);
         });
     },

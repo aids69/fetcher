@@ -1,5 +1,4 @@
 'use strict';
-const got = require('got');
 const fs = require('fs');
 const vk = require('vk-call');
 
