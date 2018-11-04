@@ -45,8 +45,7 @@ function timeout(ms) {
 // if its from Sverdlovsk region - we try to put it into db
 async function bfs(start, amount) {
     const allNotVisitedIds = await dbApi.getIdsWithoutFriends();
-    const ids = allNotVisitedIds.slice(start, amount);
-    console.info(ids);
+    const ids = allNotVisitedIds.slice(start, start + amount);
 
     for (let i = 0; i < ids.length; i++) {
         const currentId = ids[i];
