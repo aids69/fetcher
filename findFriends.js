@@ -40,26 +40,16 @@ function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// take first id from queue, get friends of this person(if profile is not private)
-// put friend ids into db, for each friend id if we didnt visit it
-// we get info from vk api, if its from Sverdlovsk region - we put it into db
-// and append id to queue
-async function bfs(part) {
-    const allIds = await dbApi.getAllIds();
-    let queue = [];
-    if (part === 0) {
-        queue = allIds.slice(0, 1850);
-    } else if (part === 1) {
-        queue = allIds.slice(1850, 3700);
-    } else if (part === 2) {
-        queue = allIds.slice(3700);
-    } else {
-        // so we all won't take third part
-        throw('You\'re an idiot sandwich. Specify id');
-    }
-    let currentId = queue.shift();    
+// iterate through ids without friends, get friends of them (if profile is not private)
+// put friend ids into db, for each friend id
+// if its from Sverdlovsk region - we try to put it into db
+async function bfs(start, amount) {
+    const allNotVisitedIds = await dbApi.getIdsWithoutFriends();
+    const ids = allNotVisitedIds.slice(start, amount);
+    console.info(ids);
 
-    while (queue.length) {
+    for (let i = 0; i < ids.length; i++) {
+        const currentId = ids[i];
         try {
             const res = await Promise.all([api.call('friends.get', { user_id: currentId }), timeout(300)]);
             const friendsIds = res[0] ? res[0].items : [];
@@ -74,21 +64,15 @@ async function bfs(part) {
                 console.info(friend.id);
                 const isFromSverdlovskReg = checkRegion(friend);
                 if (isFromSverdlovskReg) {
-                    console.info('adding');
+                    console.info('is from Sverdlovsk region');
                     await dbApi.put(friend);
-                    queue.push(friendId);
                 }
             }
         } catch (e) {
             console.info(e.message);
         }
-        currentId = queue.shift();
     }
 }
 
-// we need a starting point 0, 1850 and 3700
-// so method just takes an int from 0 to 2 and determines part
-// we are searching in
-bfs(0);
-
-
+// we need a starting point and amount of people
+bfs(0, 10);

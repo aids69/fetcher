@@ -129,6 +129,14 @@ module.exports = {
         });
     },
 
+    getIdsWithoutFriends: function(tableName = 'users') {
+        return new Promise((res, rej) => {
+            db.all(`SELECT id FROM ${tableName} WHERE friends IS NULL`, (err, rows) => {
+                err ? res([]) : res(rows.map(el => el.id));
+            });
+        });
+    },
+
     prettyPrintById: function (id, tableName = 'users') {
         module.exports.getById(id).then(res => {
             _printEntry(res);
