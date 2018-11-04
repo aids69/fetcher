@@ -44,14 +44,25 @@ function timeout(ms) {
 // put friend ids into db, for each friend id if we didnt visit it
 // we get info from vk api, if its from Sverdlovsk region - we put it into db
 // and append id to queue
-async function bfs() {
-    const queue = await dbApi.getAllIds();
-    let currentId = queue.shift();
+async function bfs(part) {
+    const allIds = await dbApi.getAllIds();
+    let queue = [];
+    if (part === 0) {
+        queue = allIds.slice(0, 1850);
+    } else if (part === 1) {
+        queue = allIds.slice(1850, 3700);
+    } else if (part === 2) {
+        queue = allIds.slice(3700);
+    } else {
+        // so we all won't take third part
+        throw('You\'re an idiot sandwich. Specify id');
+    }
+    let currentId = queue.shift();    
+
     while (queue.length) {
         try {
             const res = await Promise.all([api.call('friends.get', { user_id: currentId }), timeout(300)]);
             const friendsIds = res[0] ? res[0].items : [];
-            console.info(friendsIds);
 
             await dbApi.addFriends(currentId, JSON.stringify(friendsIds.join(',')));
             for (let friendId of friendsIds) {
@@ -75,8 +86,9 @@ async function bfs() {
     }
 }
 
-// идея, лучше, чем поиск в ширину или нет? заходить в базу и просить у неё
-// человека без друзец и для него искать друзей
-bfs();
+// we need a starting point 0, 1850 and 3700
+// so method just takes an int from 0 to 2 and determines part
+// we are searching in
+bfs(0);
 
 
