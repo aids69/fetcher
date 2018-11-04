@@ -47,7 +47,6 @@ function timeout(ms) {
 async function bfs() {
     const queue = await dbApi.getAllIds();
     let currentId = queue.shift();
-    console.info(currentId);
     while (queue.length) {
         try {
             const res = await Promise.all([api.call('friends.get', { user_id: currentId }), timeout(300)]);
@@ -56,16 +55,14 @@ async function bfs() {
 
             await dbApi.addFriends(currentId, JSON.stringify(friendsIds.join(',')));
             for (let friendId of friendsIds) {
-                // const response = await findUser(friendId);
                 const response = await Promise.all([
                     api.call('users.get', { user_ids: friendId, fields }),
                     timeout(350)
                 ]);
                 const friend = response[0] ? response[0][0] : {};
                 console.info(friend.id);
-                const alreadyVisited = await dbApi.contains(friend.id);
                 const isFromSverdlovskReg = checkRegion(friend);
-                if (!alreadyVisited && isFromSverdlovskReg) {
+                if (isFromSverdlovskReg) {
                     console.info('adding');
                     await dbApi.put(friend);
                     queue.push(friendId);
@@ -78,6 +75,8 @@ async function bfs() {
     }
 }
 
+// идея, лучше, чем поиск в ширину или нет? заходить в базу и просить у неё
+// человека без друзец и для него искать друзей
 bfs();
 
 

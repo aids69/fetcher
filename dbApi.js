@@ -6,7 +6,7 @@ const db = new sqlite3.Database('./db/users.db');
 
 function _attachSubFields(keys, values, subFields, field, person) {
     subFields.forEach(subField => {
-        keys.push(`${field}_${subField}`);        
+        keys.push(`${field}_${subField}`);
         // for arrays langs: []
         if (subField === 'langs') {
             values.push(person[field][subField].join(','));
@@ -28,8 +28,8 @@ module.exports = {
     // obj
     put: function (person) {
         const objectFields = ['city', 'country', 'last_seen',
-            'military', 'occupation', 'personal', 'relation_partner'];
-        const arrayFields = ['career', 'relatives', 'schools', 'universities'];
+            'occupation', 'personal', 'relation_partner', 'status_audio'];
+        const arrayFields = ['career', 'military', 'relatives', 'schools', 'universities'];
         const keys = [];
         const values = [];
 
@@ -71,15 +71,8 @@ module.exports = {
         // slice is for [ and ] and replace removes escaping backslashes
         let valuesStr = JSON.stringify(values).slice(1, -1).replace(/\\"/g, '"').replace(/\\'/g, '\'');
         return new Promise((res, rej) => {
-            // thats a bad solution to check if db contains id after everything else
-            // but im too lazy right now
-            db.serialize(() => {
-                if (module.exports.contains(person.id)) {
-                    res();
-                }
-                db.run(`INSERT INTO users(${keysStr}) VALUES(${valuesStr})`, [], err => {
-                    err ? rej(err) : res();
-                })
+            db.run(`INSERT OR IGNORE INTO users(${keysStr}) VALUES(${valuesStr})`, [], err => {
+                err ? rej(err) : res();
             });
         });
     },
@@ -96,8 +89,8 @@ module.exports = {
         return new Promise((res, rej) => {
             db.run(`CREATE TABLE IF NOT EXISTS ${tableName} (${schema})`, [], err => {
                 err ? rej(err) : res();
-            })
-        })
+            });
+        });
     },
 
     getById: function (id, tableName = 'users') {
@@ -132,7 +125,7 @@ module.exports = {
         return new Promise((res, rej) => {
             db.run(`UPDATE ${tableName} SET friends = ${friends} WHERE id = ${id}`, [], err => {
                 err ? rej(err) : res();
-            })
+            });
         });
     },
 
@@ -147,7 +140,7 @@ module.exports = {
             res.forEach(entry => {
                 console.info();
                 _printEntry(entry);
-            })
+            });
         });
     }
 }
