@@ -119,6 +119,23 @@ const usersSchema = `
     verified INTEGER
 `;
 
+const communitiesSchema = `
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    screen_name TEXT,
+    is_closed INTEGER,
+    type TEXT,
+    members_count INTEGER,
+    verified INTEGER,
+    activity TEXT,
+    age_limits INTEGER,
+    description TEXT,
+    status TEXT,
+    trending INTEGER
+`;
+// age_limits: 1 - none, 2 - 16+, 3 - 18+
+
 module.exports = {
-    usersSchema
+    usersSchema,
+    communitiesSchema
 };

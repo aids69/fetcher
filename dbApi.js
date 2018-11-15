@@ -129,10 +129,51 @@ module.exports = {
         });
     },
 
-    getIdsWithoutFriends: function(tableName = 'users') {
+    addGroups: function (id, groups, tableName = 'users') {
+        return new Promise((res, rej) => {
+            db.run(`UPDATE ${tableName} SET communities = ${groups} WHERE id = ${id}`, [], err => {
+                err ? rej(err) : res();
+            });
+        });
+    },
+
+    getIdsWithoutFriends: function (tableName = 'users') {
         return new Promise((res, rej) => {
             db.all(`SELECT id FROM ${tableName} WHERE friends IS NULL`, (err, rows) => {
                 err ? res([]) : res(rows.map(el => el.id));
+            });
+        });
+    },
+
+    getIdsWithoutGroups: function (tableName = 'users') {
+        return new Promise((res, rej) => {
+            db.all(`SELECT id FROM ${tableName} WHERE communities IS NULL`, (err, rows) => {
+                err ? res([]) : res(rows.map(el => el.id));
+            });
+        });
+    },
+
+    putGroup: function (group) {
+        const keys = [
+            'id', 'name', 'screen_name', 'is_closed', 'type', 'members_count',
+            'verified', 'activity', 'age_limits', 'description', 'status', 'trending'
+        ];
+
+        const values = [];
+        keys.forEach(key => {
+            let current = group[key];
+            if (typeof current === 'string') {
+                current  = current.replace(/\"/g, '""')
+            }
+            values.push(current);
+        });
+
+        let valuesStr = JSON.stringify(values).slice(1, -1).replace(/\\"/g, '"').replace(/\\'/g, '\'');
+        valuesStr = valuesStr.replace(/\\n/g, ' ');
+
+        return new Promise((res, rej) => {
+            db.run(`INSERT OR IGNORE INTO groups(${keys.join(', ')}) VALUES(${valuesStr})`, [], err => {
+                err ? rej(err) : res();
             });
         });
     },

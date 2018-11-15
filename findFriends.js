@@ -46,6 +46,7 @@ function timeout(ms) {
 async function bfs(start, amount) {
     const allNotVisitedIds = await dbApi.getIdsWithoutFriends();
     const ids = allNotVisitedIds.slice(start, start + amount);
+    console.info(ids);
 
     for (let i = 0; i < ids.length; i++) {
         const currentId = ids[i];
@@ -74,4 +75,4 @@ async function bfs(start, amount) {
 }
 
 // we need a starting point and amount of people
-bfs(0, 10);
+bfs(110000, 2000);
