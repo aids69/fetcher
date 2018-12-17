@@ -2,7 +2,7 @@
 
 const { usersSchema } = require('./db/schema');
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./db/users.db');
+const db = new sqlite3.Database('../brute_classifier/db/users.db');
 
 function _attachSubFields(keys, values, subFields, field, person) {
     subFields.forEach(subField => {
