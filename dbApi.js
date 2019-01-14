@@ -67,6 +67,12 @@ module.exports = {
             }
         };
 
+        if (keys.indexOf('timezone') !== -1) {
+            const idx = keys.indexOf('timezone');
+            keys.splice(idx, 1);
+            values.splice(idx, 1);
+        }
+
         const keysStr = keys.join(', ');
         // slice is for [ and ] and replace removes escaping backslashes
         let valuesStr = JSON.stringify(values).slice(1, -1).replace(/\\"/g, '"').replace(/\\'/g, '\'');
