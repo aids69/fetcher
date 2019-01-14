@@ -36,6 +36,10 @@ async function findById(id) {
             dbApi.addGroups(id, JSON.stringify(groups.items.join(',')));
         }
         console.info('Found:', user.first_name, user.last_name);
+        
+        fs.writeFile('../brute_classifier/current_id.txt', id, err => {
+            return;
+        });
     } catch (e) {
         console.info(e);
     }
