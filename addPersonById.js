@@ -29,6 +29,7 @@ async function findById(id) {
     try {
         let user = await api.call('users.get', { user_ids: [id], fields });
         user = user[0];
+        id = user.id; // when screen_name is passed
         const groups = await api.call('groups.get', { user_id: id, count: 1000 });
         await dbApi.put(user);
         if (groups && groups.items) {
